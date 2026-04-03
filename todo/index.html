@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Café Mulé - Menú Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFFFFF;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+        .category-card {
+            transition: transform 0.2s ease;
+        }
+        .category-card:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    
+    <!-- Vista Principal (Home) -->
+    <div id="homeView" class="view active">
+        <!-- Logo/Perfil -->
+        <div class="flex justify-center pt-8 pb-6">
+            <img 
+                src="logo.jpg" 
+                alt="Café Mulé Logo" 
+                class="w-32 h-32 rounded-full object-cover shadow-lg"
+            />
+        </div>
+
+        <!-- Hero Image -->
+        <div class="px-4 mb-10">
+            <img 
+                src="local.jpg" 
+                alt="Café Mulé - Vista del local" 
+                class="w-full rounded-2xl shadow-xl object-cover aspect-video"
+            />
+        </div>
+
+        <!-- Grid de Categorías -->
+        <div class="px-4 pb-8">
+            <div id="categoriesGrid" class="grid grid-cols-2 gap-3">
+                <!-- Las categorías se generan dinámicamente con JavaScript -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pb-8 px-4">
+            <p class="text-sm text-gray-500 mb-2">¡Contanos tu experiencia!</p>
+            <p class="text-xs text-gray-400">@mulecafe</p>
+        </div>
+    </div>
+
+    <!-- Vista de Categoría (Detalle) -->
+    <div id="categoryView" class="view">
+        <!-- Header con Botón Volver -->
+        <div class="sticky top-0 bg-white z-10 border-b border-gray-200 px-4 py-5 flex items-center shadow-sm">
+            <button id="backButton" class="flex items-center text-gray-800 font-semibold text-base hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Volver
+            </button>
+        </div>
+
+        <!-- Título de Categoría -->
+        <div class="px-4 py-6">
+            <h2 id="categoryTitle" class="text-2xl font-bold text-gray-800"></h2>
+            <p id="categorySubtitle" class="text-sm text-gray-500 mt-1"></p>
+        </div>
+
+        <!-- Lista de Items -->
+        <div id="itemsList" class="px-4 pb-8 space-y-4">
+            <!-- Los items se generan dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Datos del menú estructurados por categorías
+        const menuData = {
+            "Cafetería": {
+                subtitle: "Café, infusiones y bebidas calientes",
+                items: [
+                    { name: "Café chico", description: "Cortado o lágrima", price: "$ 3500" },
+                    { name: "Café en jarrito", description: "Cortado o lágrima", price: "$ 3500" },
+                    { name: "Café doble", description: "Cortado o lágrima", price: "$ 3900" },
+                    { name: "Capuchino doble", description: "", price: "$ 4200" },
+                    { name: "Té DILMAH", description: "Consultar variedades", price: "$ 3500" },
+                    { name: "Submarino", description: "", price: "$ 4200" },
+                    { name: "Chocolatada", description: "", price: "$ 4200" },
+                    { name: "Vainilla latte", description: "", price: "$ 4200" },
+                    { name: "Caramel Macchiato", description: "", price: "$ 4200" },
+                    { name: "Moccacino", description: "", price: "$ 4200" },
+                    { name: "Nut", description: "", price: "$ 4200" }
+                ]
+            },
+            "Desayunos & Meriendas": {
+                subtitle: "Comienza el día o disfruta la tarde",
+                items: [
+                    { name: "Plato de frutas, granola y yogurt", description: "", price: "$ 9200" },
+                    { name: "Tostadas de pan de campo", description: "Con queso blanco y dulce casero", price: "$ 7500" },
+                    { name: "Tostadas de pan integral con semillas", description: "Con queso blanco y dulce casero", price: "$ 7900" },
+                    { name: "Tostón en pan de campo", description: "Con guacamole, huevos revueltos y mix de semillas", price: "$ 9300" },
+                    { name: "Tostado de jamón y queso", description: "Opcional pan molde o árabe", price: "$ 6900" },
+                    { name: "Tostado de jamón, queso y tomate", description: "Opcional pan molde o árabe", price: "$ 7200" },
+                    { name: "Ciabatta de jamón y queso", description: "", price: "$ 9200" },
+                    { name: "Chipá casero", description: "", price: "$ 5200" },
+                    { name: "Medialuna de manteca", description: "Dulce o salada", price: "$ 2200" },
+                    { name: "Medialuna de manteca", description: "Con jamón y queso", price: "$ 5900" },
+                    { name: "Clásico Mulé", description: "Café con leche o té, tostadas, dulce casero, manteca o queso blanco, con jugo de naranja", price: "$ 12500" },
+                    { name: "Desayuno americano", description: "Tostón de campo, huevo revuelto, palta, panceta, tomates cherrys y café con leche", price: "$ 15100" },
+                    { name: "Sin Tacc", description: "Café con leche o té, con torta marquise", price: "$ 13500" }
+                ]
+            },
+            "Pastelería": {
+                subtitle: "Dulces artesanales",
+                items: [
+                    { name: "Croissant dulce o salado", description: "", price: "$ 4700" },
+                    { name: "Croissant relleno con pastelera", description: "", price: "$ 5900" },
+                    { name: "Croissant relleno con ganache de chocolate", description: "", price: "$ 7900" },
+                    { name: "Roll de canela", description: "Con azúcar impalpable o glaseado de naranja", price: "$ 4700" },
+                    { name: "Crumble cookies", description: "Con chip de chocolate / Red velvet con chocolate blanco / cacao y chocolate", price: "$ 4500" },
+                    { name: "Alfajor de coco", description: "", price: "$ 4500" },
+                    { name: "Alfajor de nuez", description: "", price: "$ 4500" },
+                    { name: "Budín de limón", description: "", price: "$ 4500" },
+                    { name: "Budín hamburgués", description: "", price: "$ 5900" },
+                    { name: "Tarta de coco", description: "", price: "$ 7900" },
+                    { name: "Budín de arándanos", description: "", price: "$ 5900" }
+                ]
+            },
+            "Entradas": {
+                subtitle: "Para compartir",
+                items: [
+                    { name: "2x1 en Aperol Spritz", description: "Con la consumición de cualquiera de las entradas de 12 a 16hs y de 20 a 00hs", price: "" },
+                    { name: "Papas fritas condimentadas", description: "Con dips de barbacoa y alioli de ajo", price: "$ 6800" },
+                    { name: "Buñuelos de espinaca", description: "Con alioli de ajo y picles de cebolla", price: "$ 9600" },
+                    { name: "Rebozaditas de mozzarella", description: "Sobre espejo de pomarola", price: "$ 12300" },
+                    { name: "Rabas", description: "Con crema ranchera (mayonesa, cebolla, provenzal y limón)", price: "$ 25500" },
+                    { name: "Dos empanadas a elección", description: "Cordero y queso azul suave o pejerrey", price: "$ 8900" },
+                    { name: "Tabla Mulé", description: "Langostinos apanados, bastones de muzzarella, buñuelitos de espinaca, rellenitos de panceta, provolone y cebolla caramelizada, milanesitas de pejerrey, papas fritas condimentadas y aderezo de la casa", price: "$ 25500" }
+                ]
+            },
+            "Sándwiches": {
+                subtitle: "Todos acompañados de papas fritas condimentadas",
+                items: [
+                    { name: "Bondiola desmechada", description: "Con barbacoa y coleslaw", price: "$ 17100" },
+                    { name: "Ternera", description: "Con cebolla caramelizada, queso tybo, tomates confitados, alioli ahumado y rúcula", price: "$ 17100" },
+                    { name: "Hamburguesa", description: "Doble carne con queso cheddar, panceta, cebolla crispy y barbacoa", price: "$ 17500" },
+                    { name: "Milanesa de gírgola", description: "Con palta, cilantro y alioli de morrón", price: "$ 22900" }
+                ]
+            },
+            "Ensaladas": {
+                subtitle: "*Aclare si no puede consumir harinas",
+                items: [
+                    { name: "Ensalada Cobb", description: "Lechuga, huevo de campo, cherrys, palta, pechuga de pollo, queso azul y panceta", price: "$ 16500" },
+                    { name: "Ensalada de estación", description: "Hojas verdes, queso brie, zanahorias caramelizadas, garbanzos, almendras tostadas y vinagreta de miel", price: "$ 21500" },
+                    { name: "Tibia de pollo crocante", description: "Rúcula, lechuga morada, parmesano, tomates asados y salsa teriyaki", price: "$ 13800" },
+                    { name: "Tibia de langostinos", description: "Rúcula, lechuga morada, parmesano, tomates asados y salsa teriyaki", price: "$ 15800" },
+                    { name: "Adicional palta", description: "", price: "$ 4500" },
+                    { name: "Adicional huevo poche", description: "", price: "$ 1000" }
+                ]
+            },
+            "Pescados": {
+                subtitle: "Opcional: puré, fritas o ensalada",
+                items: [
+                    { name: "Pejerrey a la Romana con guarnición", description: "", price: "$ 21800" },
+                    { name: "Pesca del día", description: "Con puré de zanahoria, mix de verdes y zanahorias glaseadas", price: "$ 22500" },
+                    { name: "Plancha de langostinos", description: "Con papas cuña, alioli de morrón y gremolata", price: "$ 25900" }
+                ]
+            },
+            "Carnes": {
+                subtitle: "",
+                items: [
+                    { name: "Pamplona de pollo", description: "Sobre espejo de salsa de espinaca, acompañada de papas cuña a los 4 quesos", price: "$ 25700" },
+                    { name: "Ojo de bife", description: "Acompañado de puré de papa con perejil, demi glace y rúcula", price: "$ 28500" }
+                ]
+            },
+            "Milanesas de Bife de Chorizo": {
+                subtitle: "Elaboración artesanal",
+                items: [
+                    { name: "Con Tallarines caccio e pepe", description: "A base de pimienta y queso parmesano", price: "$ 21500" },
+                    { name: "Napolitana con puré de papa", description: "", price: "$ 24600" },
+                    { name: "Suiza con papas fritas", description: "Salsa blanca y variedad de quesos", price: "$ 21500" }
+                ]
+            },
+            "Nuestras Pastas": {
+                subtitle: "Elaboración artesanal",
+                items: [
+                    { name: "Spaghetti con frutos de mar", description: "", price: "$ 19800" },
+                    { name: "Sorrentinos de hongos gratinados", description: "A base de salsa bechamel, queso parmesano y mozzarella", price: "$ 17400" },
+                    { name: "Fusilli con ragout de cordero", description: "", price: "$ 15800" },
+                    { name: "Risotto de calabaza y osobuco", description: "", price: "$ 18200" }
+                ]
+            },
+            "Menú Infantil": {
+                subtitle: "",
+                items: [
+                    { name: "Milanesita de peceto", description: "Con puré de papas o fritas", price: "$ 12900" },
+                    { name: "Ñoquis de papa", description: "Con salsa rosa", price: "$ 12900" }
+                ]
+            },
+            "Postres & Tortas": {
+                subtitle: "",
+                items: [
+                    { name: "Flan de dulce de leche", description: "", price: "$ 5900" },
+                    { name: "Volcán de chocolate con helado de crema americana", description: "", price: "$ 11500" },
+                    { name: "Clásico Tiramisú Italiano", description: "Con almíbar de café", price: "$ 5500" },
+                    { name: "Postre Mulé", description: "Helado americana, cookies, frutos rojos y mousse de dulce de leche", price: "$ 11500" },
+                    { name: "Bocha de helado", description: "Opciones de sabores: americana, dulce de leche o chocolate", price: "$ 4900" },
+                    { name: "Ensalada de frutas", description: "Con bocha de helado", price: "$ 7900" },
+                    { name: "Porción de Torta", description: "Rogel - Marquise (chocolate, crema y DDL) - Lemon Pie - Cheesecake de frutos rojos - Torta vasca", price: "$ 10500" }
+                ]
+            },
+            "Brunch": {
+                subtitle: "",
+                items: [
+                    { name: "Brunch Mulé", description: "2 scones con salmon, queso crema y ciboulette | 2 tostadas con guacamole y huevo revuelto | 1 plato de frutas, yogurt y miel | 1 copa de jugo | 1 infusión doble", price: "$ 26100" },
+                    { name: "Te Premium", description: "1 Lingote de lemon pie | 1 Lingote de mousse de chocolate | 1 Lingote de frutos rojos | 2 Scones con mermelada | 2 Alfajor de coco | 2 Mini brioche con jamón crudo, rúcula, queso crema y cibulette | 2 Mini focaccia con cherry asado, jamón cocido y queso tybo | 2 Chipá | 2 Copas de limonada | 2 Infusiones dobles", price: "$ 53100" }
+                ]
+            },
+            "Bebidas Naturales": {
+                subtitle: "Jugos y licuados",
+                items: [
+                    { name: "Jugo de naranja", description: "", price: "$ 4200" },
+                    { name: "Limonada clásica", description: "Jugo de limón, almíbar de jengibre, agua, menta y perfume de limón", price: "$ 4200" },
+                    { name: "Limonada con frutos rojos", description: "Jugo de limón, jugo de naranja, coulis de frutos rojos, almíbar y menta", price: "$ 4200" },
+                    { name: "Pomelada", description: "Jugo de pomelo, almíbar de romero, agua, pepino y romero", price: "$ 4200" },
+                    { name: "Jarra de limonada / pomelada", description: "1000 cc", price: "$ 8200" },
+                    { name: "Jugo detox", description: "De naranja, zanahoria y apio / de kiwi, espinaca y pepino", price: "$ 6200" },
+                    { name: "Licuados de banana", description: "Con agua o con leche", price: "$ 4900" },
+                    { name: "Jugo naranja-durazno", description: "", price: "$ 4900" }
+                ]
+            },
+            "Cervezas": {
+                subtitle: "",
+                items: [
+                    { name: "Heineken 1l", description: "", price: "$ 13200" },
+                    { name: "Heineken 330cc", description: "", price: "$ 7700" },
+                    { name: "Kibor (cerveza de elaboración local) 500cc", description: "Golden ale / red / honey / ipa", price: "$ 8700" }
+                ]
+            },
+            "Vinos": {
+                subtitle: "",
+                items: [
+                    { name: "Portillo Malbec / Sauvignon Blanc", description: "Copa", price: "$ 4500" },
+                    { name: "Portillo Malbec / Sauvignon Blanc", description: "Botella", price: "$ 9400" },
+                    { name: "Altos del Plata Malbec", description: "Bodega Terrazas de los Andes", price: "$ 12300" },
+                    { name: "Altos del Plata Chardonnay", description: "Bodega Terrazas de los Andes", price: "$ 12300" },
+                    { name: "Alamos Malbec / Chardonnay", description: "Bodega Catena Zapata", price: "$ 13500" },
+                    { name: "Nicasia Red Blend Malbec", description: "Bodega Catena Zapata", price: "$ 14200" },
+                    { name: "Cordero con piel de lobo Malbec / Bonarda / Rosé", description: "Bodega Mosquita Muerta", price: "$ 9400" },
+                    { name: "Perro Callejero Blend tintas", description: "Bodega Mosquita Muerta", price: "$ 12800" },
+                    { name: "Sapo de otro pozo Malbec", description: "Bodega Salentein - Valle de Uco", price: "$ 22500" }
+                ]
+            },
+            "Espumantes": {
+                subtitle: "",
+                items: [
+                    { name: "Alamos ext brut", description: "Bodega Catena Zapata", price: "$ 16900" }
+                ]
+            },
+            "Tragos": {
+                subtitle: "",
+                items: [
+                    { name: "Aperol Spritz", description: "Aperol, espumante, soda, rodaja de naranja", price: "$ 7900" },
+                    { name: "Aperol Rosé", description: "Aperol, Sidra 1888 Rosé, frutos rojos", price: "$ 7900" },
+                    { name: "Bicicletta", description: "Campari, vino blanco seco, soda, naranja, perfume de naranja", price: "$ 7900" },
+                    { name: "Red Collins", description: "Gin, jugo de limón, almíbar simple, coulis de frutos rojos, soda, deshidratada de naranja", price: "$ 7900" },
+                    { name: "Tan gimlet", description: "Gin cítrico, jugo de limón, almíbar simple, tónica", price: "$ 7900" },
+                    { name: "Vermucito de estación", description: "Vermouth, gin, soda, naranja gajo, perfume de naranja", price: "$ 7900" },
+                    { name: "Mule club sour", description: "Gin, aperol, jugo de limón, coulis de frutos rojos, clara de huevo, menta", price: "$ 7900" },
+                    { name: "Gin de la casa", description: "Gin nacional de la semana y tónica (consultar toppins)", price: "$ 7900" },
+                    { name: "Mr. Bali Hai", description: "Ron blanco, ron dorado, campari, jugo de limón, almíbar de ananá, bitter y menta", price: "$ 7900" }
+                ]
+            },
+            "Whisky": {
+                subtitle: "",
+                items: [
+                    { name: "Johnnie Walker Red Label", description: "", price: "$ 7000" },
+                    { name: "Johnnie Walker Black Label", description: "", price: "$ 9500" }
+                ]
+            },
+            "Aguas & Gaseosas": {
+                subtitle: "",
+                items: [
+                    { name: "Agua mineral sin gas / con gas", description: "", price: "$ 3800" },
+                    { name: "Aquarius", description: "Pomelo / manzana / pera", price: "$ 4000" },
+                    { name: "Línea Coca-Cola", description: "Coca-Cola / Coca-Cola Zero / Sprite / Sprite Zero / Fanta / Schweppes Tónica o Pomelo", price: "$ 4000" }
+                ]
+            }
+        };
+
+        // Variables para manejar las vistas
+        let currentCategory = null;
+
+        // Referencias a elementos del DOM
+        const homeView = document.getElementById('homeView');
+        const categoryView = document.getElementById('categoryView');
+        const categoriesGrid = document.getElementById('categoriesGrid');
+        const backButton = document.getElementById('backButton');
+        const categoryTitle = document.getElementById('categoryTitle');
+        const categorySubtitle = document.getElementById('categorySubtitle');
+        const itemsList = document.getElementById('itemsList');
+
+        // Función para renderizar las categorías
+        function renderCategories() {
+            categoriesGrid.innerHTML = '';
+            
+            Object.keys(menuData).forEach(categoryName => {
+                const card = document.createElement('div');
+                card.className = 'category-card bg-white rounded-2xl p-6 text-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-all border-2 border-gray-200 shadow-sm';
+                card.innerHTML = `
+                    <h3 class="font-bold text-gray-800 text-base leading-snug">${categoryName}</h3>
+                `;
+                card.addEventListener('click', () => showCategory(categoryName));
+                categoriesGrid.appendChild(card);
+            });
+        }
+
+        // Función para mostrar una categoría específica
+        function showCategory(categoryName) {
+            currentCategory = categoryName;
+            const category = menuData[categoryName];
+            
+            // Actualizar título y subtítulo
+            categoryTitle.textContent = categoryName;
+            categorySubtitle.textContent = category.subtitle;
+            
+            // Renderizar items
+            itemsList.innerHTML = '';
+            category.items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'border-b border-gray-100 pb-4';
+                
+                const hasPrice = item.price && item.price.trim() !== '';
+                
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 text-base mb-1">${item.name}</h4>
+                            ${item.description ? `<p class="text-sm text-gray-500 leading-relaxed">${item.description}</p>` : ''}
+                        </div>
+                        ${hasPrice ? `<div class="font-bold text-gray-800 text-base whitespace-nowrap">${item.price}</div>` : ''}
+                    </div>
+                `;
+                itemsList.appendChild(itemDiv);
+            });
+            
+            // Cambiar de vista
+            homeView.classList.remove('active');
+            categoryView.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Función para volver a la vista principal
+        function showHome() {
+            categoryView.classList.remove('active');
+            homeView.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Event listener para el botón volver
+        backButton.addEventListener('click', showHome);
+
+        // Inicializar la app
+        renderCategories();
+    </script>
+</body>
+</html>
